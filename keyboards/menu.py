@@ -9,4 +9,7 @@ def main_menu_kb():
         ],
     ]
 
-    return ReplyKeyboardMarkup(keyboard=keyboard, resize_keyboard=True)
+    return ReplyKeyboardMarkup(
+        keyboard=keyboard,
+        resize_keyboard=True,
+        input_field_placeholder='Выберите пункт меню')
