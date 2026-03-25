@@ -1,0 +1,265 @@
+{
+  "cake_options": {
+    "levels": [
+      {
+        "id": "1_level",
+        "name": "1 уровень",
+        "price_add": 400,
+        "description": "Одноярусный торт"
+      },
+      {
+        "id": "2_level",
+        "name": "2 уровня",
+        "price_add": 750,
+        "description": "Двухъярусный торт"
+      },
+      {
+        "id": "3_level",
+        "name": "3 уровня",
+        "price_add": 1100,
+        "description": "Трёхъярусный торт"
+      }
+    ],
+    "shapes": [
+      {
+        "id": "square",
+        "name": "Квадрат",
+        "price_add": 600,
+        "description": "Квадратная форма"
+      },
+      {
+        "id": "round",
+        "name": "Круг",
+        "price_add": 400,
+        "description": "Круглая форма"
+      },
+      {
+        "id": "rectangle",
+        "name": "Прямоугольник",
+        "price_add": 1000,
+        "description": "Прямоугольная форма"
+      }
+    ],
+    "toppings": [
+      {
+        "id": "no_topping",
+        "name": "Без топпинга",
+        "price_add": 0,
+        "description": "Без дополнительных соусов"
+      },
+      {
+        "id": "white_sauce",
+        "name": "Белый соус",
+        "price_add": 200,
+        "description": "Нежный белый соус"
+      },
+      {
+        "id": "caramel_syrup",
+        "name": "Карамельный сироп",
+        "price_add": 180,
+        "description": "Сладкий карамельный сироп"
+      },
+      {
+        "id": "maple_syrup",
+        "name": "Кленовый сироп",
+        "price_add": 200,
+        "description": "Натуральный кленовый сироп"
+      },
+      {
+        "id": "strawberry_syrup",
+        "name": "Клубничный сироп",
+        "price_add": 300,
+        "description": "Сочный клубничный сироп"
+      },
+      {
+        "id": "blueberry_syrup",
+        "name": "Черничный сироп",
+        "price_add": 350,
+        "description": "Ароматный черничный сироп"
+      },
+      {
+        "id": "milk_chocolate",
+        "name": "Молочный шоколад",
+        "price_add": 200,
+        "description": "Глазурь из молочного шоколада"
+      }
+    ],
+    "berries": [
+      {
+        "id": "blackberry",
+        "name": "Ежевика",
+        "price_add": 400,
+        "description": "Свежая ежевика"
+      },
+      {
+        "id": "raspberry",
+        "name": "Малина",
+        "price_add": 300,
+        "description": "Спелая малина"
+      },
+      {
+        "id": "blueberry",
+        "name": "Голубика",
+        "price_add": 450,
+        "description": "Крупная голубика"
+      },
+      {
+        "id": "strawberry",
+        "name": "Клубника",
+        "price_add": 500,
+        "description": "Сладкая клубника"
+      }
+    ],
+    "decorations": [
+      {
+        "id": "pistachios",
+        "name": "Фисташки",
+        "price_add": 300,
+        "description": "Измельчённые фисташки"
+      },
+      {
+        "id": "meringue",
+        "name": "Безе",
+        "price_add": 400,
+        "description": "Воздушное безе"
+      },
+      {
+        "id": "hazelnuts",
+        "name": "Фундук",
+        "price_add": 350,
+        "description": "Цельные или дроблёные орехи"
+      },
+      {
+        "id": "pecan",
+        "name": "Пекан",
+        "price_add": 300,
+        "description": "Орехи пекан"
+      },
+      {
+        "id": "marshmallow",
+        "name": "Маршмеллоу",
+        "price_add": 200,
+        "description": "Мини‑маршмеллоу"
+      },
+      {
+        "id": "marzipan",
+        "name": "Марципан",
+        "price_add": 280,
+        "description": "Фигурки из марципана"
+      }
+    ],
+    "message": {
+      "id": "custom_message",
+      "name": "Надпись",
+      "price_add": 500,
+      "description": "Мы можем разместить на торте любую надпись, например: «С днём рождения!»",
+      "input_required": true
+    },
+    "ready_cakes": [
+      {
+        "id": "chocolate_classic",
+        "name": "Классический шоколадный",
+        "price": 1200,
+        "description": "Плотный шоколадный бисквит с шоколадным кремом",
+        "image_url": "https://example.com/images/chocolate.jpg"
+      },
+      {
+        "id": "red_velvet",
+        "name": "Красный бархат",
+        "price": 1400,
+        "description": "Нежный красный бисквит с крем‑чизом",
+        "image_url": "https://example.com/images/red_velvet.jpg"
+      },
+      {
+        "id": "berry_cheesecake",
+        "name": "Ягодный чизкейк",
+        "price": 1300,
+        "description": "Творожная основа с ягодным соусом и свежими ягодами",
+        "image_url": "https://example.com/images/cheesecake.jpg"
+      },
+      {
+        "id": "honey_cake",
+        "name": "Медовик",
+        "price": 1100,
+        "description": "Тонкие медовые коржи со сметанным кремом",
+        "image_url": "https://example.com/images/honey_cake.jpg"
+      }
+    ]
+  },
+  "users": [
+    {
+      "telegram_id": 123456789,
+      "delivery_address": "ул. Ленина, 15, кв. 23, г. Москва",
+      "orders": ["ORD-20240315-001", "ORD-20240320-002"],
+      "created_at": "2024-03-15T10:30:00",
+      "total_orders_count": 2,
+      "favorite_address": true
+    },
+    {
+      "telegram_id": 987654321,
+      "delivery_address": "пр. Мира, 45, г. Санкт‑Петербург",
+      "orders": ["ORD-20240318-001"],
+      "created_at": "2024-03-18T11:15:00",
+      "total_orders_count": 1,
+      "favorite_address": false
+    }
+  ],
+  "orders": [
+  {
+    "order_id": "ORD-20240315-001",
+    "telegram_id": 123456789,
+    "cake_type": "custom",
+    "cake_details": {
+      "levels": "2_level",
+      "shape": "round",
+      "topping": "white_sauce",
+      "berries": ["raspberry", "strawberry"],
+      "decorations": ["marshmallow"],
+      "message_text": "С днём рождения, Маша!"
+    },
+    "total_price": 2130,
+    "delivery_address": "ул. Ленина, 15, кв. 23, г. Москва",
+    "delivery_date": "2024-03-20",
+    "delivery_time": "18:00",
+    "status": "paid",
+    "comment": "Торт нужен к 18:00. Клиент просил позвонить за час до готовности",
+    "created_at": "2024-03-15T14:25:30",
+    "updated_at": "2024-03-15T14:45:10"
+  },
+  {
+    "order_id": "ORD-20240320-002",
+    "telegram_id": 123456789,
+    "cake_type": "ready",
+    "cake_details": {
+      "ready_cake_id": "red_velvet",
+      "name": "Красный бархат",
+      "price": 1400
+    },
+    "total_price": 1400,
+    "delivery_address": "ул. Ленина, 15, кв. 23, г. Москва",
+    "delivery_date": "2024-04-05",
+    "delivery_time": "12:00",
+    "status": "in_progress",
+    "comment": "Пожалуйста, упакуйте аккуратно",
+    "created_at": "2024-03-20T09:15:00",
+    "updated_at": "2024-03-20T09:20:00"
+  },
+  {
+    "order_id": "ORD-20240318-001",
+    "telegram_id": 987654321,
+    "cake_type": "ready",
+    "cake_details": {
+      "ready_cake_id": "honey_cake",
+      "name": "Медовик",
+      "price": 1100
+    },
+    "total_price": 1100,
+    "delivery_address": "пр. Мира, 45, г. Санкт‑Петербург",
+    "delivery_date": "2024-03-25",
+    "delivery_time": "15:30",
+    "status": "confirmed",
+    "comment": "Без украшений, пожалуйста",
+    "created_at": "2024-03-18T11:20:00",
+    "updated_at": "2024-03-18T11:25:00"
+  }
+]
