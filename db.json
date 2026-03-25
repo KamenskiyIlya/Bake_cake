@@ -41,5 +41,31 @@
       "weight": "1 кг",
       "levels": 1
     }
+  ],
+  "orders": [
+	{
+		"id": 1,
+		"user_id": 441112407,
+		"product_type": "standard_cakes",
+		"product_id": 3,
+		"product_name": "Ягодный чизкейк",
+		"total_price": 1300,
+		"created_at": "25.03.2026",
+		"status": "готовится",
+		"address": "Улица Пушкина, дом Колотушкина, 33",
+		"comment": "Доставщик должен обязательно спеть"
+	},
+	{
+		"id": 2,
+		"user_id": 441112407,
+		"product_type": "standard_cakes",
+		"product_id": 3,
+		"product_name": "Ягодный чизкейк",
+		"total_price": 1300,
+		"created_at": "25.03.2026",
+		"status": "готовится",
+		"address": "Улица Пушкина, дом Колотушкина, 33",
+		"comment": "Доставщик должен обязательно спеть"
+	}
   ]
 }
