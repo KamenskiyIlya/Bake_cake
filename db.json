@@ -3,5 +3,43 @@
     "pd_agreement": {
       "pdf_file": "pd_agreement.pdf"
     }
-  }
+  },
+  "standard_cakes": [
+    {
+      "id": 1,
+      "name": "Классический шоколадный",
+      "description": "Нежный бисквит с молочным шоколадом и кремом. Идеально для любителей шоколада!",
+      "price": 1200,
+      "image": "chocolate_cake.jpg",
+      "weight": "1 кг",
+      "levels": 1
+    },
+    {
+      "id": 2,
+      "name": "Красный бархат",
+      "description": "Красный бисквит с сырным кремом. Элегантный торт для особых случаев",
+      "price": 1400,
+      "image": "red_velvet.jpg",
+      "weight": "1 кг",
+      "levels": 1
+    },
+    {
+      "id": 3,
+      "name": "Ягодный чизкейк",
+      "description": "Нью-йоркский чизкейк с клубникой и черникой. Летний хит!",
+      "price": 1300,
+      "image": "cheesecake.jpg",
+      "weight": "1 кг",
+      "levels": 1
+    },
+    {
+      "id": 4,
+      "name": "Медовик",
+      "description": "Классический медовый торт с сметанным кремом. Домашний вкус",
+      "price": 1100,
+      "image": "medovik.jpg",
+      "weight": "1 кг",
+      "levels": 1
+    }
+  ]
 }
