@@ -42,30 +42,182 @@
       "levels": 1
     }
   ],
+  "cake_options": {
+    "levels": [
+      {
+        "id": 1,
+        "name": "1 уровень",
+        "price_add": 400,
+        "description": "Одноярусный торт"
+      },
+      {
+        "id": 2,
+        "name": "2 уровня",
+        "price_add": 750,
+        "description": "Двухъярусный торт"
+      },
+      {
+        "id": 3,
+        "name": "3 уровня",
+        "price_add": 1100,
+        "description": "Трёхъярусный торт"
+      }
+    ],
+    "shapes": [
+      {
+        "id": 1,
+        "name": "Квадрат",
+        "price_add": 600,
+        "description": "Квадратная форма"
+      },
+      {
+        "id": 2,
+        "name": "Круг",
+        "price_add": 400,
+        "description": "Круглая форма"
+      },
+      {
+        "id": 3,
+        "name": "Прямоугольник",
+        "price_add": 1000,
+        "description": "Прямоугольная форма"
+      }
+    ],
+    "toppings": [
+      {
+        "id": 0,
+        "name": "Без топпинга",
+        "price_add": 0,
+        "description": "Без дополнительных соусов"
+      },
+      {
+        "id": 1,
+        "name": "Белый соус",
+        "price_add": 200,
+        "description": "Нежный белый соус"
+      },
+      {
+        "id": 2,
+        "name": "Карамельный сироп",
+        "price_add": 180,
+        "description": "Сладкий карамельный сироп"
+      },
+      {
+        "id": 3,
+        "name": "Кленовый сироп",
+        "price_add": 200,
+        "description": "Натуральный кленовый сироп"
+      },
+      {
+        "id": 4,
+        "name": "Клубничный сироп",
+        "price_add": 300,
+        "description": "Сочный клубничный сироп"
+      },
+      {
+        "id": 5,
+        "name": "Черничный сироп",
+        "price_add": 350,
+        "description": "Ароматный черничный сироп"
+      },
+      {
+        "id": 6,
+        "name": "Молочный шоколад",
+        "price_add": 200,
+        "description": "Глазурь из молочного шоколада"
+      }
+    ],
+    "berries": [
+      {
+        "id": 1,
+        "name": "Ежевика",
+        "price_add": 400,
+        "description": "Свежая ежевика"
+      },
+      {
+        "id": 2,
+        "name": "Малина",
+        "price_add": 300,
+        "description": "Спелая малина"
+      },
+      {
+        "id": 3,
+        "name": "Голубика",
+        "price_add": 450,
+        "description": "Крупная голубика"
+      },
+      {
+        "id": 4,
+        "name": "Клубника",
+        "price_add": 500,
+        "description": "Сладкая клубника"
+      }
+    ],
+    "decorations": [
+      {
+        "id": 1,
+        "name": "Фисташки",
+        "price_add": 300,
+        "description": "Измельчённые фисташки"
+      },
+      {
+        "id": 2,
+        "name": "Безе",
+        "price_add": 400,
+        "description": "Воздушное безе"
+      },
+      {
+        "id": 3,
+        "name": "Фундук",
+        "price_add": 350,
+        "description": "Цельные или дроблёные орехи"
+      },
+      {
+        "id": 4,
+        "name": "Пекан",
+        "price_add": 300,
+        "description": "Орехи пекан"
+      },
+      {
+        "id": 5,
+        "name": "Маршмеллоу",
+        "price_add": 200,
+        "description": "Мини‑маршмеллоу"
+      },
+      {
+        "id": 6,
+        "name": "Марципан",
+        "price_add": 280,
+        "description": "Фигурки из марципана"
+      }
+    ]
+  },
   "orders": [
-	{
-		"id": 1,
-		"user_id": 441112407,
-		"product_type": "standard_cakes",
-		"product_id": 3,
-		"product_name": "Ягодный чизкейк",
-		"total_price": 1300,
-		"created_at": "25.03.2026",
-		"status": "готовится",
-		"address": "Улица Пушкина, дом Колотушкина, 33",
-		"comment": "Доставщик должен обязательно спеть"
-	},
-	{
-		"id": 2,
-		"user_id": 441112407,
-		"product_type": "standard_cakes",
-		"product_id": 3,
-		"product_name": "Ягодный чизкейк",
-		"total_price": 1300,
-		"created_at": "25.03.2026",
-		"status": "готовится",
-		"address": "Улица Пушкина, дом Колотушкина, 33",
-		"comment": "Доставщик должен обязательно спеть"
-	}
+    {
+      "id": 1,
+      "user_id": 441112407,
+      "product_type": "standard_cakes",
+      "product_id": 3,
+      "product_name": "Ягодный чизкейк",
+      "total_price": 1300,
+      "created_at": "25.03.2026 10:00",
+      "deliver_to": "30.03.2026 15:00",
+      "status": "Передан в доставку",
+      "address": "Улица Пушкина, дом Колотушкина, 33",
+      "comment": "Доставщик должен обязательно спеть"
+    },
+    {
+      "id": 2,
+      "user_id": 441112407,
+      "product_type": "standard_cakes",
+      "product_id": 3,
+      "product_name": "Ягодный чизкейк",
+      "total_price": 1300,
+      "created_at": "25.03.2026 10:00",
+      "deliver_to": "25.03.2026 15:00",
+      "status": "Оплачен",
+      "address": "Улица Пушкина, дом Колотушкина, 33",
+      "comment": "Доставщик должен обязательно спеть"
+    }
   ]
 }

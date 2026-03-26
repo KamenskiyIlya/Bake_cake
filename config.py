@@ -15,4 +15,5 @@ with open(CONFIG_PATH, "r", encoding="utf-8") as f:
 PD_PDF_PATH = BASE_DIR/"data"/DB["meta"]["pd_agreement"]["pdf_file"]
 IMG_PATH = BASE_DIR / "data" / "cakes"
 CAKES = DB["standard_cakes"]
+CAKE_OPTIONS = DB["cake_options"]
 ORDERS = DB["orders"]
