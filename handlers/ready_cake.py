@@ -7,13 +7,15 @@ from aiogram.types import (
     InlineKeyboardButton,
     ReplyKeyboardMarkup,
     KeyboardButton,
-    ReplyKeyboardRemove
+    ReplyKeyboardRemove,
+    CallbackQuery,
+    Message,
 )
 
 from keyboards.ready_cake import *
 from keyboards.menu import main_menu_kb
 from handlers.states import OrderForm, CustomizationForm
-from handlers.customer_orders import cancel_repeat_order
+from handlers.db_utils import create_order, create_or_find_customer
 from config import CAKES, CAKE_OPTIONS, IMG_PATH
 
 from datetime import datetime
@@ -322,6 +324,7 @@ async def start_order_form(message_or_callback, state: FSMContext):
     if data.get("message"): 
         custom_parts.append(f'Надпись: "{data["message"]}"')
     
+    await state.update_data(customizations=custom_parts)
     await state.update_data(customization=" | ".join(custom_parts))
 
     customization_text = data.get('customization', 'Кастомизация') or 'Стандартный'
@@ -485,6 +488,54 @@ async def show_order_summary(message: types.Message, state: FSMContext):
         ])
     )
 
+
+@router.callback_query(F.data == "order_confirmed")
+async def processing_order(callback: CallbackQuery, state: FSMContext):
+    data = await state.get_data()
+    cake = data['selected_cake']
+    user_id = callback.from_user.id
+
+    try:
+        await callback.message.delete()
+    except Exception as e:
+        print(f'Ошибка при удалении сообщения: {e}')
+
+    customer = create_or_find_customer(
+        tg_id=user_id,
+        name=data['name'],
+        phone=data['phone'],
+        address=data['address'])
+
+    order_data = {
+        'name': data['name'],
+        'customer_id': customer['id'],
+        'phone_number': data['phone'],
+        'product_id': cake['id'],
+        'product_name': cake['name'],
+        'total_price': data['total_price'],
+        'date': data['date'],
+        'time': data['time'],
+        'address': data['address'],
+        'comment': data.get('comment', '-'),
+        'customization': data.get('customizations', '-')
+    }
+
+    new_order = create_order(order_data)
+
+    await callback.message.answer(
+            f"✅ Заказ #{new_order['id']} успешно оформлен!\n\n"
+            f"📋 Детали заказа:\n"
+            f"- Торт: {cake['name']}\n"
+            f"- Стоимость: {new_order['total_price']}₽\n"
+            f"- Доставка: {new_order['deliver_to']}\n"
+            f"- Адрес: {new_order['address']}\n"
+            f"- Статус: {new_order['status']}\n\n"
+            f"Вы можете отслеживать статус заказа в разделе «Мои заказы».",
+            reply_markup=main_menu_kb()
+        )
+
+    await state.clear()
+    await callback.answer()
 
 @router.callback_query(F.data == "cakes_list")
 async def back_to_cakes_list(callback: types.CallbackQuery):
