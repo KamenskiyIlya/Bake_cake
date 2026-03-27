@@ -11,29 +11,12 @@ from aiogram.types import (
 )
 from keyboards.ready_cake import *
 from keyboards.menu import main_menu_kb
+from handlers.states import OrderForm, CustomizationForm
 from config import CAKES, CAKE_OPTIONS, IMG_PATH
 from datetime import datetime
 
 
 router = Router()
-
-
-class OrderForm(StatesGroup):
-    waiting_name = State()
-    waiting_phone = State()
-    waiting_address = State()
-    waiting_date = State()
-    waiting_time = State()
-    waiting_comment = State()
-
-
-class CustomizationForm(StatesGroup):
-    waiting_levels = State()
-    waiting_shape = State()
-    waiting_topping = State()
-    waiting_berries = State()
-    waiting_decor = State()
-    waiting_message = State()
 
 
 def get_option_by_id(options, option_id_str):
