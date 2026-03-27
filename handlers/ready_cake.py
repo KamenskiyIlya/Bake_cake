@@ -9,10 +9,13 @@ from aiogram.types import (
     KeyboardButton,
     ReplyKeyboardRemove
 )
+
 from keyboards.ready_cake import *
 from keyboards.menu import main_menu_kb
 from handlers.states import OrderForm, CustomizationForm
+from handlers.customer_orders import cancel_repeat_order
 from config import CAKES, CAKE_OPTIONS, IMG_PATH
+
 from datetime import datetime
 
 
@@ -390,10 +393,12 @@ async def process_phone_next(message: types.Message, state: FSMContext, phone: s
     )
 
 
-@router.message(OrderForm.waiting_address)
+@router.message(OrderForm.waiting_address, F.text != "Отмена повторного заказа")
 async def process_address(message: types.Message, state: FSMContext):
     await state.update_data(address=message.text)
+
     await state.set_state(OrderForm.waiting_date)
+
     await message.answer(
         "Введите дату:\n"
         "В формате - 15.12.2025\n\n"
@@ -492,7 +497,8 @@ async def back_to_cakes_list(callback: types.CallbackQuery):
 
 
 @router.callback_query(F.data == "main_menu")
-async def back_to_main_menu(callback: types.CallbackQuery):
+async def back_to_main_menu(callback: types.CallbackQuery, state: types.FSMContext):
+    await state.clear()
     await callback.message.delete()
     await callback.message.answer(
         "Вы перешли на главное меню",

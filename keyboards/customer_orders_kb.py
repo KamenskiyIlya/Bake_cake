@@ -25,3 +25,26 @@ def what_customer_needs():
 	]
 
 	return InlineKeyboardMarkup(inline_keyboard=keyboard)
+
+
+def old_address_kb(address):
+	keyboard = [
+		[KeyboardButton(text=address)],
+		[KeyboardButton(text="Отмена повторного заказа")]
+	]
+
+	return ReplyKeyboardMarkup(
+        keyboard=keyboard,
+        resize_keyboard=True,
+        input_field_placeholder='Выберите старый адрес или введите новый'
+	)
+
+def first_order_kb():
+	keyboard = [
+		[KeyboardButton(text='Заказать торт')]
+	]
+
+	return ReplyKeyboardMarkup(
+        keyboard=keyboard,
+        resize_keyboard=True
+	)

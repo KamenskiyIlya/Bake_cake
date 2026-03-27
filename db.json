@@ -195,7 +195,7 @@
   "orders": [
     {
       "id": 1,
-      "user_id": 441112407,
+      "user_id": 1,
       "product_type": "standard_cakes",
       "product_id": 3,
       "product_name": "Ягодный чизкейк",
@@ -203,19 +203,21 @@
       "created_at": "25.03.2026 10:00",
       "deliver_to": "30.03.2026 15:00",
       "status": "Передан в доставку",
+	  "phone_number": "+79779829413",
       "address": "Улица Пушкина, дом Колотушкина, 33",
       "comment": "Доставщик должен обязательно спеть"
     },
     {
       "id": 2,
-      "user_id": 441112407,
+      "user_id": 1,
       "product_type": "standard_cakes",
       "product_id": 3,
       "product_name": "Ягодный чизкейк",
       "total_price": 1300,
       "created_at": "25.03.2026 10:00",
       "deliver_to": "25.03.2026 15:00",
-      "status": "Оплачен",
+      "status": "Заказ доставлен",
+	  "phone_number": "+79779829413",
       "address": "Улица Пушкина, дом Колотушкина, 33",
       "comment": "Доставщик должен обязательно спеть"
     }
@@ -225,14 +227,15 @@
 		"id": 1,
 		"telegram_id": 441112407,
 		"name": "Каменщик",
-		"phone_number": +79779829413,
+		"phone_number": "+79779829413",
 		"address": "Улица Пушкина, дом Колотушкина, 33"
 	},
 		{
 		"id": 2,
 		"telegram_id": 441112406,
 		"name": "Каменщик",
-		"phone_number": +79779829413,
+		"phone_number": "+79779829413",
 		"address": "Улица Пушкина, дом Колотушкина, 33"
 	}
+  ]
 }

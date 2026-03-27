@@ -17,3 +17,4 @@ IMG_PATH = BASE_DIR / "data" / "cakes"
 CAKES = DB["standard_cakes"]
 CAKE_OPTIONS = DB["cake_options"]
 ORDERS = DB["orders"]
+CUSTOMERS = DB["customers"]
