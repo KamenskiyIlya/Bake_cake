@@ -548,7 +548,7 @@ async def back_to_cakes_list(callback: types.CallbackQuery):
 
 
 @router.callback_query(F.data == "main_menu")
-async def back_to_main_menu(callback: types.CallbackQuery, state: types.FSMContext):
+async def back_to_main_menu(callback: types.CallbackQuery, state: FSMContext):
     await state.clear()
     await callback.message.delete()
     await callback.message.answer(
