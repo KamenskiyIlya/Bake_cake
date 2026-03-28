@@ -1,6 +1,6 @@
 from aiogram import Router, F, types
 from keyboards.customer_orders_kb import (
-    all_user_orders, what_customer_needs, old_address_kb, first_order_kb)
+    show_user_order, what_customer_needs, old_address_kb, first_order_kb)
 from keyboards.menu import main_menu_kb
 from aiogram.types import CallbackQuery, Message, ReplyKeyboardRemove
 from aiogram.fsm.context import FSMContext
@@ -15,11 +15,6 @@ from datetime import datetime
 router = Router()
 
 STATUSES = {
-    'Не оплачен': (
-        '⏳ Ожидает оплаты\n\n'
-        'Заказ сформирован, но оплата ещё не поступила.\n'
-        'Чтобы мы начали обработку, пожалуйста, завершите оплату удобным способом.\n'
-        'Если оплата уже была произведена — в течение нескольких минут статус обновится автоматически.'),
     'Оплачен': (
         '✅ Оплачен\n\n'
         'Спасибо! Оплата успешно получена.\n'
@@ -42,6 +37,7 @@ STATUSES = {
 @router.message(F.text == "Мои заказы")
 async def show_orders(message: Message, state: FSMContext):
     user_id = message.from_user.id
+    order = next((order for order in ORDERS if order['id'] == order_id), None)
     customer = None
     for client in CUSTOMERS:
         if str(client.get('telegram_id')) == str(user_id):
@@ -70,7 +66,7 @@ async def show_orders(message: Message, state: FSMContext):
                 f'Дата доставки: {order["deliver_to"]}\n'
                 f'Адрес доставки: {order["address"]}\n'
                 f'Статус: {order["status"]}',
-                reply_markup=all_user_orders(order=order)
+                reply_markup=show_user_order(order=order)
             )
             user_orders.append(order)
             message_ids.append(order_msg.message_id)
@@ -81,6 +77,7 @@ async def show_orders(message: Message, state: FSMContext):
         msg = await message.answer(
             'Выберите какой из вышеуказанных заказов Вас интересует?')
         message_ids.append(msg.message_id)
+        await state.update_data(order_messages=message_ids)
     else:
         await message.answer(
             'У Вас пока не было заказов',
@@ -89,7 +86,7 @@ async def show_orders(message: Message, state: FSMContext):
 
 @router.callback_query(F.data.startswith('order_id_'))
 async def chose_order(callback: CallbackQuery, state: FSMContext):
-    order_id = callback.data.split('_')[2]
+    order_id = int(callback.data.split('_')[2])
     await state.update_data(order_id=order_id)
 
     state_data = await state.get_data()
@@ -106,6 +103,12 @@ async def chose_order(callback: CallbackQuery, state: FSMContext):
 
     await callback.message.answer(
         f'Вы выбрали заказ c номером: {order_id}\n'
+        f'Название торта: {order["product_name"]}\n'
+        f'Общая сумма: {order["total_price"]}\n'
+        f'Дата заказа: {order["created_at"]}\n'
+        f'Дата доставки: {order["deliver_to"]}\n'
+        f'Адрес доставки: {order["address"]}\n'
+        f'Статус: {order["status"]}\n\n'
         'Выберите, что Вас интересует',
         reply_markup=what_customer_needs())
 
@@ -134,7 +137,7 @@ async def check_status_order(callback: CallbackQuery, state: FSMContext):
         await callback.message.answer(
             f"Статус заказа с номером {order_id}:\n\n"
             f'{STATUSES[order_status]}',
-            reply_markup=main_menu_kb())
+            reply_markup=main_menu_kb(callback.from_user.id))
 
     elif (current_datetime > diliver_datetime 
         and order_status != 'Заказ доставлен'):
@@ -147,12 +150,12 @@ async def check_status_order(callback: CallbackQuery, state: FSMContext):
                 "Постараемся доставить как можно быстрее.\n"
                 "Спасибо за понимание и терпение!\n\n"
                 "Ваша кондитерская Bake Cake.🍰",
-                reply_markup=main_menu_kb())
+                reply_markup=main_menu_kb(callback.from_user.id))
     else:
         await callback.message.answer(
             f"Статус заказа с номером {order_id}:\n\n"
             f'{STATUSES[order_status]}',
-            reply_markup=main_menu_kb())
+            reply_markup=main_menu_kb(callback.from_user.id))
 
     await callback.answer()
 
@@ -175,7 +178,7 @@ async def repeat_order(callback: CallbackQuery, state: FSMContext):
     if not cake:
         await callback.message.answer(
             'Торт из заказа больше не доступен.',
-            reply_markup=main_menu_kb())
+            reply_markup=main_menu_kb(callback.from_user.id))
         await callback.answer()
         return
 
@@ -207,7 +210,7 @@ async def cancel_repeat_order(message: Message, state: FSMContext):
     await state.clear()
     await message.answer(
         "Повтор заказа отменён.",
-        reply_markup=main_menu_kb())
+        reply_markup=main_menu_kb(message.from_user.id))
 
 
 def find_order_by_id(order_id):

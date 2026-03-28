@@ -262,7 +262,8 @@
   "orders": [
     {
       "id": 1,
-      "customer_id": 1,
+      "customer_id": 2,
+      "customer_id": 2,
       "product_id": 3,
       "product_name": "Ягодный чизкейк",
       "customization": "-",
@@ -276,7 +277,7 @@
     },
     {
       "id": 2,
-      "customer_id": 1,
+      "customer_id": 2,
       "product_id": 3,
       "product_name": "Ягодный чизкейк",
       "customization": "-",
@@ -290,7 +291,7 @@
     },
     {
       "id": 3,
-      "customer_id": 1,
+      "customer_id": 2,
       "product_id": 1,
       "product_name": "Классический шоколадный",
       "customization": "-",
@@ -304,7 +305,7 @@
     },
     {
       "id": 4,
-      "customer_id": 1,
+      "customer_id": 2,
       "product_id": 1,
       "product_name": "Классический шоколадный",
       "customization": "-",
@@ -327,10 +328,32 @@
     },
     {
       "id": 2,
-      "telegram_id": 441112406,
-      "name": "Каменщик",
+      "telegram_id": 6113251330,
+      "name": "Егор",
       "phone_number": "+79779829413",
       "address": "Улица Пушкина, дом Колотушкина, 33"
     }
+  ],
+  "admins": [
+	  {
+		"id": 1,
+		"telegram_id": 441112407,
+		"name": "Илья"
+	  },
+	  {
+		"id": 2,
+		"telegram_id": 775982956,
+		"name": "Тамара"
+	  },
+	  {
+		"id": 3,
+		"telegram_id": 6113251330,
+		"name": "Егор"
+	  },
+	  {
+		"id": 4,
+		"telegram_id": 337897610,
+		"name": "Иван"
+	  }
   ]
 }

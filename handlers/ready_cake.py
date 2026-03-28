@@ -588,7 +588,7 @@ async def processing_order(callback: CallbackQuery, state: FSMContext):
             f"- Адрес: {new_order['address']}\n"
             f"- Статус: {new_order['status']}\n\n"
             f"Вы можете отслеживать статус заказа в разделе «Мои заказы».",
-            reply_markup=main_menu_kb()
+            reply_markup=main_menu_kb(user_id)
         )
 
     await state.clear()
@@ -610,7 +610,7 @@ async def back_to_main_menu(callback: types.CallbackQuery, state: FSMContext):
     await callback.message.delete()
     await callback.message.answer(
         "Вы перешли на главное меню",
-        reply_markup=main_menu_kb()
+        reply_markup=main_menu_kb(callback.from_user.id)
     )
     await callback.answer()
 

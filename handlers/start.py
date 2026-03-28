@@ -34,7 +34,7 @@ async def start_bot(message: types.Message):
         '• Доступные интервалы: с 10:00 до 22:00\n'
         '• Вы всегда можете указать удобное время и комментарий для курьера\n\n'
         '👇 Начните с выбора: посмотреть готовые торты или собрать свой уникальный десерт!',
-        reply_markup=main_menu_kb()
+        reply_markup=main_menu_kb(message.from_user.id)
     )
 
 
@@ -54,5 +54,5 @@ async def return_to_menu(message: types.Message):
         '• Доступные интервалы: с 10:00 до 22:00\n'
         '• Вы всегда можете указать удобное время и комментарий для курьера\n\n'
         '👇 Начните с выбора: посмотреть готовые торты или собрать свой уникальный десерт!',
-        reply_markup=main_menu_kb()
+        reply_markup=main_menu_kb(message.from_user.id)
     )

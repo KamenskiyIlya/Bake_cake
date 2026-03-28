@@ -4,7 +4,7 @@ from aiogram.types import (
 
 
 
-def all_user_orders(order):
+def show_user_order(order):
 	button_text = f"Заказ номер {order['id']}"
 	keyboard = [[
 		InlineKeyboardButton(
