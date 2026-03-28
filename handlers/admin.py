@@ -2,8 +2,15 @@ from aiogram import Router, F, types
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 
-from keyboards.admin_kb import admin_main_kb, show_order, order_actions
+from keyboards.admin_kb import (
+    admin_main_kb,
+    show_order,
+    order_actions,
+    change_order_status_kb,
+    after_change_status)
 from config import ADMIN_IDS, ORDERS, CUSTOMERS
+from handlers.states import AdminStates
+from handlers.db_utils import load_db, save_db
 
 
 router = Router()
@@ -110,6 +117,7 @@ async def admin_order_details(callback: CallbackQuery, state: FSMContext):
         f'Телефон: {order["phone_number"]}\n'
         f'Торт: {order["product_name"]}\n'
         f'Кастомизация: {order["customization"]}\n'
+        f'Примененный промокод: {order['promo_code']}'
         f'Сумма заказа: {order["total_price"]}\n'
         f'Дата заказа: {order["created_at"]}\n'
         f'Доставить к: {order["deliver_to"]}\n'
@@ -117,6 +125,54 @@ async def admin_order_details(callback: CallbackQuery, state: FSMContext):
         f'Комментарий к заказу: {order["comment"]}\n'
         f'Статус: {order["status"]}',
         reply_markup=order_actions(order_id, customer["telegram_id"])
+    )
+
+    await callback.answer()
+
+@router.callback_query(
+    F.data.startswith('change_status_'),
+    is_admin_callback)
+async def change_order_status(callback: CallbackQuery, state: FSMContext):
+    order_id = int(callback.data.split('_')[2])
+    await state.update_data(current_order_id=order_id)
+    await state.set_state(AdminStates.waiting_new_status)
+
+    await callback.message.edit_text(
+        'Выберите новый статус заказа:',
+        reply_markup=change_order_status_kb()
+    )
+
+    await callback.answer()
+
+
+@router.callback_query(
+    F.data.startswith('status_'),
+    AdminStates.waiting_new_status)
+async def admin_set_status(callback: CallbackQuery, state: FSMContext):
+    status_list = {
+    'paid': 'Оплачен',
+    'delivery': 'Передан в доставку',
+    'delivered': 'Заказ доставлен'
+    }
+
+    status_key = callback.data.split('_')[1]
+    new_status = status_list.get(status_key)
+
+    data = await state.get_data()
+    order_id = data.get("current_order_id")
+    db=load_db()
+    orders = db.get('orders')
+    for order in orders:
+        if order['id'] == order_id:
+            order['status'] = new_status
+            save_db(db)
+            break
+
+    await state.clear()
+
+    await callback.message.edit_text(
+        f'✅ Статус заказа #{order_id} изменён на: {new_status}',
+        reply_markup=after_change_status()
     )
 
     await callback.answer()

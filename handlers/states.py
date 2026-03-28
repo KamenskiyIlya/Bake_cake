@@ -18,3 +18,7 @@ class CustomizationForm(StatesGroup):
     waiting_berries = State()
     waiting_decor = State()
     waiting_message = State()
+
+
+class AdminStates(StatesGroup):
+    waiting_new_status = State()

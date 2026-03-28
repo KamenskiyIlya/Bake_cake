@@ -467,6 +467,7 @@ async def process_promo(message: types.Message, state: FSMContext):
     promo = get_valid_promo(promo_code)
 
     if promo:
+        await state.update_data(promo_code=promo_code)
         data = await state.get_data()
         discount_percent = promo["discount_percent"]
         increase_promo_usage(promo_code)
@@ -546,6 +547,7 @@ async def show_order_summary(message: types.Message, state: FSMContext):
 async def processing_order(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     cake = data['selected_cake']
+    promo_code = data['promo_code']
     user_id = callback.from_user.id
 
     try:
@@ -574,7 +576,8 @@ async def processing_order(callback: CallbackQuery, state: FSMContext):
         'time': data['time'],
         'address': data['address'],
         'comment': data.get('comment', '-'),
-        'customization': data.get('customization', '-')
+        'customization': data.get('customization', '-'),
+        'promo_code': promo_code
     }
 
     new_order = create_order(order_data)

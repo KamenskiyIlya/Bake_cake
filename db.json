@@ -202,7 +202,7 @@
       "conditions": {
         "valid_for": "cakes",
         "max_uses": 100,
-        "uses_count": 1,
+        "uses_count": 4,
         "is_active": true
       }
     },
@@ -262,22 +262,21 @@
   "orders": [
     {
       "id": 1,
-      "customer_id": 2,
-      "customer_id": 2,
+      "customer_id": 1,
       "product_id": 3,
       "product_name": "Ягодный чизкейк",
       "customization": "-",
       "total_price": 1300,
       "created_at": "25.03.2026 10:00",
       "deliver_to": "30.03.2026 15:00",
-      "status": "Передан в доставку",
+      "status": "Оплачен",
       "phone_number": "+79779829413",
       "address": "Улица Пушкина, дом Колотушкина, 33",
       "comment": "Доставщик должен обязательно спеть"
     },
     {
       "id": 2,
-      "customer_id": 2,
+      "customer_id": 1,
       "product_id": 3,
       "product_name": "Ягодный чизкейк",
       "customization": "-",
@@ -298,7 +297,7 @@
       "total_price": 1200,
       "created_at": "28.03.2026 00:31",
       "deliver_to": "29.03.2026 18:00",
-      "status": "Не оплачен",
+      "status": "Оплачен",
       "phone_number": "+79779829413",
       "address": "Ул.Пушкина",
       "comment": "-"
@@ -316,15 +315,60 @@
       "phone_number": "+79779829413",
       "address": "Ул. Пушкина",
       "comment": "-"
+    },
+    {
+      "id": 5,
+      "customer_id": 1,
+      "product_id": 1,
+      "product_name": "Классический шоколадный",
+      "customization": null,
+      "total_price": 1020,
+      "created_at": "28.03.2026 19:44",
+      "deliver_to": "29.03.2026 18:00",
+      "status": "Не оплачен",
+      "phone_number": "+79779829413",
+      "address": "СССР",
+      "comment": "-",
+      "promo_code": null
+    },
+    {
+      "id": 6,
+      "customer_id": 1,
+      "product_id": 2,
+      "product_name": "Красный бархат",
+      "customization": null,
+      "total_price": 1190,
+      "created_at": "28.03.2026 19:52",
+      "deliver_to": "30.03.2025 18:00",
+      "status": "Не оплачен",
+      "phone_number": "+79779829413",
+      "address": "Гаражное товарищество 10",
+      "comment": "-",
+      "promo_code": "BABYCAKE15"
+    },
+    {
+      "id": 7,
+      "customer_id": 1,
+      "product_id": 2,
+      "product_name": "Красный бархат",
+      "customization": "3 уровня | Прямоугольник | Черничный сироп | Ежевика | Фундук | Надпись: \"C ДР КРЧ\"",
+      "total_price": 4335,
+      "created_at": "28.03.2026 20:04",
+      "deliver_to": "30.03.2026 18:00",
+      "status": "Не оплачен",
+      "phone_number": "+79779829413",
+      "address": "Бумажный город",
+      "comment": "Хочу чтобы привезли тор в костюме дракона",
+      "promo_code": "BABYCAKE15"
     }
   ],
   "customers": [
     {
       "id": 1,
       "telegram_id": 441112407,
-      "name": "Илья",
+      "name": "Тот самыцй",
       "phone_number": "+79779829413",
-      "address": "Улица Пушкина, дом Колотушкина, 33"
+      "address": "Бумажный город"
     },
     {
       "id": 2,
@@ -335,25 +379,25 @@
     }
   ],
   "admins": [
-	  {
-		"id": 1,
-		"telegram_id": 441112407,
-		"name": "Илья"
-	  },
-	  {
-		"id": 2,
-		"telegram_id": 775982956,
-		"name": "Тамара"
-	  },
-	  {
-		"id": 3,
-		"telegram_id": 6113251330,
-		"name": "Егор"
-	  },
-	  {
-		"id": 4,
-		"telegram_id": 337897610,
-		"name": "Иван"
-	  }
+    {
+      "id": 1,
+      "telegram_id": 441112407,
+      "name": "Илья"
+    },
+    {
+      "id": 2,
+      "telegram_id": 775982956,
+      "name": "Тамара"
+    },
+    {
+      "id": 3,
+      "telegram_id": 6113251330,
+      "name": "Егор"
+    },
+    {
+      "id": 4,
+      "telegram_id": 337897610,
+      "name": "Иван"
+    }
   ]
 }

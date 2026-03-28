@@ -36,7 +36,8 @@ def old_address_kb(address):
 	return ReplyKeyboardMarkup(
         keyboard=keyboard,
         resize_keyboard=True,
-        input_field_placeholder='Выберите старый адрес или введите новый'
+        input_field_placeholder='Выберите старый адрес или введите новый',
+        one_time_keyboard=True
 	)
 
 def first_order_kb():
@@ -46,5 +47,6 @@ def first_order_kb():
 
 	return ReplyKeyboardMarkup(
         keyboard=keyboard,
-        resize_keyboard=True
+        resize_keyboard=True,
+        one_time_keyboard=True
 	)

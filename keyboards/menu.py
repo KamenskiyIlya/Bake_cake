@@ -18,4 +18,6 @@ def main_menu_kb(user_id = None):
     return ReplyKeyboardMarkup(
         keyboard=keyboard,
         resize_keyboard=True,
-        input_field_placeholder='Выберите пункт меню')
+        input_field_placeholder='Выберите пункт меню',
+        one_time_keyboard=True
+    )

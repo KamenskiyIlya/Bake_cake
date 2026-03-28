@@ -37,7 +37,6 @@ STATUSES = {
 @router.message(F.text == "Мои заказы")
 async def show_orders(message: Message, state: FSMContext):
     user_id = message.from_user.id
-    order = next((order for order in ORDERS if order['id'] == order_id), None)
     customer = None
     for client in CUSTOMERS:
         if str(client.get('telegram_id')) == str(user_id):
@@ -87,6 +86,7 @@ async def show_orders(message: Message, state: FSMContext):
 @router.callback_query(F.data.startswith('order_id_'))
 async def chose_order(callback: CallbackQuery, state: FSMContext):
     order_id = int(callback.data.split('_')[2])
+    order = next((order for order in ORDERS if order['id'] == order_id), None)
     await state.update_data(order_id=order_id)
 
     state_data = await state.get_data()

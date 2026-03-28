@@ -38,6 +38,34 @@ def order_actions(order_id, customer_tg_id):
             url=f"tg://user?id={customer_tg_id}")],
         [InlineKeyboardButton(text='К списку заказов',
             callback_data='new_orders')],
+        [InlineKeyboardButton(text='Вернуться в панель админа',
+            callback_data='admin_back')],
+    ])
+
+    return keyboard
+
+
+def change_order_status_kb():
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text='Оплачен',
+            callback_data='status_paid')],
+        [InlineKeyboardButton(text='Передан в доставку',
+            callback_data='status_delivery')],
+        [InlineKeyboardButton(text='Доставлен',
+            callback_data='status_delivered')],
+        [InlineKeyboardButton(text='Вернуться в панель админа',
+            callback_data='admin_back')],
+    ])
+
+    return keyboard
+
+
+def after_change_status():
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text='Вернуться в панель админа',
+            callback_data='admin_back')],
+        [InlineKeyboardButton(text='Вернуться к заказам',
+            callback_data='new_orders')],
     ])
 
     return keyboard
