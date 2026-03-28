@@ -15,9 +15,13 @@ from aiogram.types import (
 from keyboards.ready_cake import *
 from keyboards.menu import main_menu_kb
 from handlers.states import OrderForm, CustomizationForm
-from handlers.db_utils import create_order, create_or_find_customer, get_valid_promo, increase_promo_usage
+from handlers.db_utils import *
 from config import CAKES, CAKE_OPTIONS, IMG_PATH, PROMO_CODES, CUSTOMERS
-
+from decouple import config
+import qrcode
+import tempfile
+import os
+from urllib.parse import urlencode
 from datetime import datetime
 
 
@@ -34,6 +38,38 @@ def get_option_by_id(options, option_id_str):
         if option["id"] == option_id:
             return option
     return None
+
+
+def generate_payment_url(order_id, amount, description):
+    base_url = "https://paymaster.ru/payment/init"
+    params = {
+        "merchantId": config('PAYMENT_TOKEN'),
+        "amount": str(amount),
+        "currency": "RUB",
+        "orderId": str(order_id),
+        "description": description[:100],
+        "testMode": "1",
+    }
+    return f"{base_url}?{urlencode(params)}"
+
+
+def generate_qr_code_file(payment_url: str):
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=10,
+        border=4,
+    )
+    qr.add_data(payment_url)
+    qr.make(fit=True)
+    
+    img = qr.make_image(fill_color="black", back_color="white")
+
+    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.png')
+    img.save(temp_file.name, 'PNG')
+    temp_file.close()
+    
+    return temp_file.name
 
 
 @router.message(F.text == "Заказать торт")
@@ -442,10 +478,6 @@ async def process_date(message: types.Message, state: FSMContext):
 @router.callback_query(F.data == "skip_comment", OrderForm.waiting_comment)
 async def skip_comment_inline(callback: types.CallbackQuery, state: FSMContext):
     await state.update_data(comment="-")
-    try:
-        await callback.message.delete()
-    except:
-        pass
     await show_order_summary(callback.message, state)
     await callback.answer("Комментарий пропущен!")
 
@@ -549,6 +581,8 @@ async def show_order_summary(message: types.Message, state: FSMContext):
         f"Торт: {cake['name']}\n"
         f"Итоговая стоимость: {final_price}₽"
     )
+
+    await state.set_state(OrderForm.waiting_comment)
     
     await message.answer(
         summary,
@@ -564,13 +598,13 @@ async def show_order_summary(message: types.Message, state: FSMContext):
 async def processing_order(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     cake = data['selected_cake']
-    promo_code = data['promo_code']
+    promo_code = data.get('promo_code')
     user_id = callback.from_user.id
 
     try:
         await callback.message.delete()
-    except Exception as e:
-        print(f'Ошибка при удалении сообщения: {e}')
+    except Exception as error:
+        print(f'Ошибка при удалении сообщения: {error}')
 
     customer = create_or_find_customer(
         tg_id=user_id,
@@ -579,8 +613,12 @@ async def processing_order(callback: CallbackQuery, state: FSMContext):
         address=data['address'])
     
     final_price = data["total_price"]
-    if data.get("discount_percent"):
-        final_price -= int(final_price * data["discount_percent"] / 100)
+    discount_percent = data.get("discount_percent", 0)
+    if discount_percent > 0:
+        discount_amount = int(final_price * discount_percent / 100)
+        final_price -= discount_amount
+        if promo_code:
+            increase_promo_usage(promo_code)
 
     order_data = {
         'name': data['name'],
@@ -598,21 +636,139 @@ async def processing_order(callback: CallbackQuery, state: FSMContext):
     }
 
     new_order = create_order(order_data)
+    order_id = new_order['id']
 
-    await callback.message.answer(
-            f"✅ Заказ #{new_order['id']} успешно оформлен!\n\n"
-            f"📋 Детали заказа:\n"
-            f"- Торт: {cake['name']}\n"
-            f"- Стоимость: {new_order['total_price']}₽\n"
-            f"- Доставка: {new_order['deliver_to']}\n"
-            f"- Адрес: {new_order['address']}\n"
-            f"- Статус: {new_order['status']}\n\n"
-            f"Вы можете отслеживать статус заказа в разделе «Мои заказы».",
-            reply_markup=main_menu_kb(user_id)
+    description = f"Торт {cake['name']} #{order_id}"
+    payment_url = generate_payment_url(order_id, final_price, description)
+
+    payment_kb = generate_payment_kb(order_id, payment_url)
+
+    summary = (
+        f"✅ Заказ #{order_id} успешно оформлен!\n\n"
+        f"Детали заказа:\n"
+        f"- Торт: {cake['name']}\n"
+        f"- Стоимость: {new_order['total_price']}₽\n"
+        f"- Комментарий: {new_order['comment']}\n"
+        f"- Доставка: {new_order['deliver_to']}\n"
+        f"- Адрес: {new_order['address']}\n"
+        f"- Статус: {new_order['status']}\n\n"
+    )
+
+    if discount_percent > 0 and promo_code:
+        summary += f"Промокод: {promo_code} (-{discount_percent}%)\n"
+
+    summary += f"\nНомер заказа: #{order_id}\n\nДля продолжения нажмите «Оплатить»"
+
+    await callback.message.answer(summary, reply_markup=payment_kb)
+
+    manager_id = config('ADMIN_CHAT_ID', default=None)
+    if manager_id:
+        try:
+            await callback.bot.send_message(
+                manager_id,
+                f"Новая заявка #{order_id}!\n\n{summary}"
+            )
+        except Exception:
+            pass
+
+    await state.update_data(current_order_id=order_id)
+    await state.set_state(OrderForm.waiting_payment)
+    await callback.answer("Заказ создан! Перейдите к оплате")
+
+
+@router.callback_query(F.data.startswith("pay_order_"))
+async def process_pay_order(callback: types.CallbackQuery, state: FSMContext):
+    try: 
+        order_id = int(callback.data.replace("pay_order_", ""))
+        
+        order = get_order_by_id(order_id)
+        if not order:
+            await callback.message.answer("Заказ не найден!")
+            await callback.answer()
+            return
+
+        description = f"Торт {order.get('product_name', 'Торт')} #{order_id}"
+        payment_url = generate_payment_url(
+            order_id=order_id,
+            amount=order['total_price'],
+            description=description
         )
 
-    await state.clear()
-    await callback.answer()
+        qr_file_path = generate_qr_code_file(payment_url)
+        qr_image = FSInputFile(qr_file_path)
+        
+        await callback.message.answer_photo(
+            photo=qr_image,
+            caption=(
+                f"СКАНИРУЙТЕ QR КОД ДЛЯ ОПЛАТЫ\n\n"
+                f"Заказ: #{order_id}\n"
+                f"Сумма: {order['total_price']} ₽\n\n"
+                f"{description}\n\n"
+                f"Сохраните номер заказа #{order_id}!"
+            ),
+            reply_markup=generate_payment_kb(order_id, payment_url),
+            parse_mode="Markdown"
+        )
+
+        try:
+            os.unlink(qr_file_path)
+        except:
+            pass
+
+        await callback.answer("QR-код отправлен! Сканируйте для оплаты")
+
+    except Exception as e:
+        print(f"Traceback: {e}")
+
+        order_id = int(callback.data.replace("pay_order_", ""))
+        order = get_order_by_id(order_id)
+        if order:
+            payment_url = generate_payment_url(order_id, order['total_price'], "Торт")
+            await callback.message.answer(
+                f"ОПЛАТА ПО ССЫЛКЕ (QR временно недоступен)\n\n"
+                f"Заказ #{order_id} - {order['total_price']}₽\n\n"
+                f"[Перейти к оплате]({payment_url})",
+                reply_markup=generate_payment_kb(order_id, payment_url),
+                parse_mode="Markdown",
+                disable_web_page_preview=True
+            )
+        await callback.answer("Ссылка на оплату отправлена!")
+
+
+@router.callback_query(F.data.startswith("check_payment_"))
+async def process_check_payment(callback: types.CallbackQuery, state: FSMContext):
+    order_id = int(callback.data.replace("check_payment_", ""))
+    
+    order = get_order_by_id(order_id)
+    
+    if not order:
+        await callback.message.answer("Заказ не найден")
+        await callback.answer()
+        return
+
+    current_date = datetime.now().date()
+
+    update_order(order_id, status="Оплачен", start_date=current_date.strftime('%d.%m.%Y'))
+    mark_order_paid(order_id)
+
+    order = get_order_by_id(order_id)
+    
+    success_text = (
+        f"Оплата прошла успешно!\n\n"
+        f"Заказ: #{order_id}\n"
+        f"Торт: {order.get('product_name')}\n"
+        f"Доставка: {order.get('deliver_to')}\n"
+        f"Адрес: {order.get('address')}\n"
+        f"Сумма: {order.get('total_price')} ₽\n"
+        f"Статус: Оплачен"
+    )
+
+    await callback.message.answer(
+        success_text, 
+        reply_markup=generate_payment_success_kb(order_id)
+    )
+    await callback.answer("Оплата подтверждена!")
+
 
 @router.callback_query(F.data == "cakes_list")
 async def back_to_cakes_list(callback: types.CallbackQuery):
@@ -633,6 +789,16 @@ async def back_to_main_menu(callback: types.CallbackQuery, state: FSMContext):
         reply_markup=main_menu_kb(callback.from_user.id)
     )
     await callback.answer()
+
+
+@router.callback_query(F.data == "restart_order")
+async def restart_order(callback: types.CallbackQuery, state: FSMContext):
+    await state.clear()
+    await callback.message.edit_text(
+        "Заказ отменен. Начните заново:",
+        reply_markup=generate_cake_kb()
+    )
+    await callback.answer("Заказ сброшен")
 
 
 @router.callback_query(F.data == "cancel_custom")

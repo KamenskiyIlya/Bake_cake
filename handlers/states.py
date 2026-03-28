@@ -7,8 +7,9 @@ class OrderForm(StatesGroup):
     waiting_address = State()
     waiting_date = State()
     waiting_time = State()
-    waiting_comment = State()
     waiting_promo = State()
+    waiting_comment = State()
+    waiting_payment = State()
 
 
 class CustomizationForm(StatesGroup):

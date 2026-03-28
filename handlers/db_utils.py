@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
 
-from config import CONFIG_PATH, ORDERS, CUSTOMERS
+from config import CONFIG_PATH, ORDERS, CUSTOMERS, PROMO_CODES
 
 
 def load_db():
@@ -134,6 +134,7 @@ def create_order(order_data):
     orders.append(new_order)
     db["orders"] = orders
     save_db(db)
+
     ORDERS[:] = db["orders"]
     CUSTOMERS[:] = db["customers"]
 
@@ -145,3 +146,30 @@ def is_first_order(telegram_id):
     orders = db.get("orders", [])
     customer_orders = [order for order in orders if order.get('telegram_id') == telegram_id]
     return len(customer_orders) == 0
+
+
+def get_order_by_id(order_id):
+    db = load_db()
+    orders = db.get("orders", [])
+    return next((order for order in orders if order.get('id') == order_id), None)
+
+
+def update_order(order_id, **kwargs):
+    db = load_db()
+    orders = db.get("orders", [])
+    
+    for order in orders:
+        if order.get('id') == order_id:
+            for key, value in kwargs.items():
+                order[key] = value
+            db["orders"] = orders
+            save_db(db)
+            ORDERS[:] = db["orders"]
+            return order
+    
+    return None
+
+
+def mark_order_paid(order_id):
+    current_date = datetime.now().date().strftime('%d.%m.%Y')
+    return update_order(order_id, status="Оплачен", start_date=current_date)
