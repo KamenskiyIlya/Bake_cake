@@ -96,3 +96,17 @@ def generate_skip_comment_kb():
         [InlineKeyboardButton(text="Главное меню", callback_data="main_menu")]
     ])
     return keyboard
+
+
+def get_promocode_kb():
+    decline_btn = InlineKeyboardButton(
+        text="Пропустить",
+        callback_data="skip_promocode"
+    )
+
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [decline_btn],
+        ]
+    )
+    return keyboard

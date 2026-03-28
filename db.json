@@ -192,6 +192,73 @@
       }
     ]
   },
+  "promo_codes": [
+    {
+      "code": "BABYCAKE15",
+      "description": "Торты на детские праздники",
+      "discount_percent": 15,
+      "min_order": 800,
+      "category": "baby",
+      "conditions": {
+        "valid_for": "cakes",
+        "max_uses": 100,
+        "uses_count": 1,
+        "is_active": true
+      }
+    },
+    {
+      "code": "CAKEOK10",
+      "description": "На первый заказ от 1000 руб.",
+      "discount_percent": 10,
+      "min_order": 1000,
+      "category": "first_order",
+      "conditions": {
+        "first_order_only": true,
+        "max_uses": 1,
+        "uses_count": 3,
+        "per_user": true,
+        "is_active": true
+      }
+    },
+    {
+      "code": "WEDDING26",
+      "description": "На свадьбу",
+      "discount_percent": 20,
+      "min_order": 3000,
+      "category": "wedding",
+      "conditions": {
+        "valid_for": "multi_level_cakes",
+        "max_uses": 50,
+        "uses_count": 1,
+        "is_active": true
+      }
+    },
+    {
+      "code": "NEWYEAR27",
+      "description": "На новый год",
+      "discount_percent": 25,
+      "min_order": 1500,
+      "category": "new_year",
+      "conditions": {
+        "valid_months": [
+          "12"
+        ],
+        "valid_days": [
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31
+        ],
+        "max_uses": 200,
+        "uses_count": 0,
+        "is_active": true
+      }
+    }
+  ],
   "orders": [
     {
       "id": 1,

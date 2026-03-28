@@ -4,7 +4,6 @@ from decouple import config as env
 
 
 BASE_DIR = Path(__file__).resolve().parent
-
 CONFIG_PATH = BASE_DIR / "db.json"
 
 
@@ -18,3 +17,4 @@ CAKES = DB["standard_cakes"]
 CAKE_OPTIONS = DB["cake_options"]
 ORDERS = DB["orders"]
 CUSTOMERS = DB["customers"]
+PROMO_CODES = DB["promo_codes"]

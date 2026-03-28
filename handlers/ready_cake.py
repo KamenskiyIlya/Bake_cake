@@ -9,14 +9,14 @@ from aiogram.types import (
     KeyboardButton,
     ReplyKeyboardRemove,
     CallbackQuery,
-    Message,
+    Message
 )
 
 from keyboards.ready_cake import *
 from keyboards.menu import main_menu_kb
 from handlers.states import OrderForm, CustomizationForm
-from handlers.db_utils import create_order, create_or_find_customer
-from config import CAKES, CAKE_OPTIONS, IMG_PATH
+from handlers.db_utils import create_order, create_or_find_customer, get_valid_promo, increase_promo_usage
+from config import CAKES, CAKE_OPTIONS, IMG_PATH, PROMO_CODES
 
 from datetime import datetime
 
@@ -246,7 +246,7 @@ async def select_decor(callback: types.CallbackQuery, state: FSMContext):
     data = await state.get_data()
     finish_text = f"✓ {data['levels']['name']}\n✓ {data['shape']['name']}\n✓ {data['topping']['name']}\n"
 
-    berries_text = f"✓ {data['berries']['name']}" if data.get('berries') else "✗ Без ягод"
+    berries_text = f"✓ {data['berries']['name']}" if data.get('berries') else "Без ягод"
     finish_text += f"{berries_text}\n"
 
     if callback.data == "decor_none":
@@ -281,7 +281,7 @@ async def select_decor(callback: types.CallbackQuery, state: FSMContext):
 async def add_message(callback: types.CallbackQuery, state: FSMContext):
     await state.set_state(CustomizationForm.waiting_message)
     await callback.message.edit_text(
-        "Введите текст надписи на торте (или отправьте «пропустить»):",
+        "Введите текст надписи на торте (или нажмите «пропустить»):",
         reply_markup=InlineKeyboardMarkup(inline_keyboard=[
             [InlineKeyboardButton(text="Пропустить", callback_data="skip_message")]
         ])
@@ -298,9 +298,11 @@ async def finish_customization(callback: types.CallbackQuery, state: FSMContext)
 async def process_message(message: types.Message, state: FSMContext):
     data = await state.get_data()
     if message.text.strip().lower() in ['пропустить', 'skip', 'нет', 'отмена']:
+        await state.update_data(message=None)
         await start_order_form(message, state)
     else:
-        await state.update_data(message=message.text.strip(), total_price=data["total_price"] + 500)
+        new_price = data["total_price"] + 500
+        await state.update_data(message=message.text.strip(), total_price=new_price)
         await start_order_form(message, state)
 
 
@@ -323,8 +325,7 @@ async def start_order_form(message_or_callback, state: FSMContext):
         custom_parts.append("Без декора")
     if data.get("message"): 
         custom_parts.append(f'Надпись: "{data["message"]}"')
-    
-    await state.update_data(customizations=custom_parts)
+
     await state.update_data(customization=" | ".join(custom_parts))
 
     customization_text = data.get('customization', 'Кастомизация') or 'Стандартный'
@@ -432,24 +433,12 @@ async def skip_comment_inline(callback: types.CallbackQuery, state: FSMContext):
     await callback.answer("Комментарий пропущен!")
 
 
-@router.message(OrderForm.waiting_comment)
-async def process_comment(message: types.Message, state: FSMContext):
-    await state.update_data(comment=message.text)
-    try:
-        await message.delete()
-    except:
-        pass
-    await show_order_summary(message, state)
-
-
 @router.message(OrderForm.waiting_time)
 async def process_time(message: types.Message, state: FSMContext):
     await state.update_data(time=message.text)
-    await state.set_state(OrderForm.waiting_comment)
 
     data = await state.get_data()
-    cake = data["selected_cake"]
-    total_price = cake["price"]
+    total_price = data["total_price"]
     
     today_str = datetime.now().strftime("%d.%m.%Y")
     if data["date"] == today_str:
@@ -459,24 +448,88 @@ async def process_time(message: types.Message, state: FSMContext):
     
     await message.answer(
         f"ИТОГО: {total_price}₽\n\n"
-        "Комментарий к заказу?\n",
-        reply_markup=generate_skip_comment_kb()
+        f"Есть промокод?\n"
+        "Введите промокод или кнопку «пропустить»:",
+        reply_markup=get_promocode_kb()
     )
+    await state.set_state(OrderForm.waiting_promo)
+
+
+@router.message(OrderForm.waiting_promo)
+async def process_promo(message: types.Message, state: FSMContext):
+    promo_code = message.text.strip().upper()
+
+    if promo_code.lower() == "нет":
+        await state.update_data(promo_code=None, discount_percent=0)
+        await next_step_after_promo(message, state) 
+        return
+
+    promo = get_valid_promo(promo_code)
+
+    if promo:
+        data = await state.get_data()
+        discount_percent = promo["discount_percent"]
+        increase_promo_usage(promo_code)
+        await message.answer(
+            f"Поздравляем! Вы получили скидку {discount_percent}%",
+            reply_markup=ReplyKeyboardRemove()
+        )
+        await state.update_data(
+            promo_code=promo_code, 
+            discount_percent=discount_percent
+        )
+    else:
+        await message.answer(
+            "К сожалению, такого промокода не существует или он истёк.\n"
+            "Попробуйте ещё раз или нажмите «Пропустить»:",
+            reply_markup=get_promocode_kb()
+        )
+        return
+
+    await next_step_after_promo(message, state)
+
+
+async def next_step_after_promo(message: types.Message, state: FSMContext):
+    await state.set_state(OrderForm.waiting_comment)
+    await message.answer(
+        "Комментарий к заказу:",
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="Пропустить", callback_data="skip_comment")]
+        ])
+    )
+
+
+@router.callback_query(F.data == "skip_promocode", OrderForm.waiting_promo)
+async def skip_promo_callback(callback: types.CallbackQuery, state: FSMContext):
+    await state.update_data(promo_code=None, discount_percent=0)
+    await next_step_after_promo(callback.message, state)
+    await callback.answer("Промокод пропущен")
+
+
+@router.message(OrderForm.waiting_comment)
+async def process_comment(message: types.Message, state: FSMContext):
+    await state.update_data(comment=message.text or "-")
+    await show_order_summary(message, state)
 
 
 async def show_order_summary(message: types.Message, state: FSMContext):
     data = await state.get_data()
     cake = data["selected_cake"]
-    
+
+    final_price = data["total_price"]
+    if data.get("discount_percent"):
+        discount = int(data["total_price"] * data["discount_percent"] / 100)
+        final_price -= discount
+
     summary = (
         f"Заказ готов!\n\n"
         f"{data['name']}\n"
         f"{data['phone']}\n"
         f"Адрес: {data['address']}\n"
         f"Дата: {data['date']} {data['time']}\n"
-        f"Комментарий к заказу: {data['comment']}\n\n"
+        f"Комментарий к заказу: {data.get('comment', '-')}\n\n"
         f"Торт: {cake['name']}\n"
-        f"Итоговая стоимость: {data['total_price']}₽"
+        f"Итоговая стоимость: {final_price}₽"
     )
     
     await message.answer(
@@ -505,6 +558,10 @@ async def processing_order(callback: CallbackQuery, state: FSMContext):
         name=data['name'],
         phone=data['phone'],
         address=data['address'])
+    
+    final_price = data["total_price"]
+    if data.get("discount_percent"):
+        final_price -= int(final_price * data["discount_percent"] / 100)
 
     order_data = {
         'name': data['name'],
@@ -512,12 +569,12 @@ async def processing_order(callback: CallbackQuery, state: FSMContext):
         'phone_number': data['phone'],
         'product_id': cake['id'],
         'product_name': cake['name'],
-        'total_price': data['total_price'],
+        'total_price': final_price,
         'date': data['date'],
         'time': data['time'],
         'address': data['address'],
         'comment': data.get('comment', '-'),
-        'customization': data.get('customizations', '-')
+        'customization': data.get('customization', '-')
     }
 
     new_order = create_order(order_data)
