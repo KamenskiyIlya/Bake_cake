@@ -16,7 +16,7 @@ from keyboards.ready_cake import *
 from keyboards.menu import main_menu_kb
 from handlers.states import OrderForm, CustomizationForm
 from handlers.db_utils import create_order, create_or_find_customer, get_valid_promo, increase_promo_usage
-from config import CAKES, CAKE_OPTIONS, IMG_PATH, PROMO_CODES
+from config import CAKES, CAKE_OPTIONS, IMG_PATH, PROMO_CODES, CUSTOMERS
 
 from datetime import datetime
 
@@ -391,10 +391,27 @@ async def process_phone(message: types.Message, state: FSMContext):
 
 async def process_phone_next(message: types.Message, state: FSMContext, phone: str):
     await state.set_state(OrderForm.waiting_address)
-    await message.answer(
-        "Введите, пожалуйста, адрес:\n",
-        reply_markup=ReplyKeyboardMarkup(keyboard=[], resize_keyboard=True)
-    )
+    user_id = message.from_user.id
+    customer = None
+    for client in CUSTOMERS:
+        if str(client.get('telegram_id')) == str(user_id):
+            customer = client
+            break
+
+    if customer:
+        await message.answer(
+            "Введите, пожалуйста, адрес или выберите ранее использованный:\n",
+            reply_markup=ReplyKeyboardMarkup(
+                keyboard=[[KeyboardButton(text=customer['address'])]],
+                resize_keyboard=True,
+                one_time_keyboard=True
+            )
+        )
+    else:
+        await message.answer(
+            "Введите, пожалуйста, адрес:\n",
+            reply_markup=ReplyKeyboardRemove()
+        )
 
 
 @router.message(OrderForm.waiting_address, F.text != "Отмена повторного заказа")
