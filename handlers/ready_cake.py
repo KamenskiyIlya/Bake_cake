@@ -481,6 +481,7 @@ async def process_date(message: types.Message, state: FSMContext):
 @router.callback_query(F.data == "skip_comment", OrderForm.waiting_comment)
 async def skip_comment_inline(callback: types.CallbackQuery, state: FSMContext):
     await state.update_data(comment="-")
+    await state.set_state(OrderForm.waiting_summary)
     await show_order_summary(callback.message, state)
     await callback.answer("Комментарий пропущен!")
 
@@ -542,14 +543,22 @@ async def process_promo(message: types.Message, state: FSMContext):
     await next_step_after_promo(message, state)
 
 
-async def next_step_after_promo(message: types.Message, state: FSMContext):
+async def next_step_after_promo(message_or_callback, state: FSMContext):
     await state.set_state(OrderForm.waiting_comment)
-    await message.edit_text(
-        "Комментарий к заказу:",
-        reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text="Пропустить", callback_data="skip_comment")]
-        ])
-    )
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="Пропустить", callback_data="skip_comment")]
+    ])
+    
+    if isinstance(message_or_callback, types.Message):
+        await message_or_callback.answer(
+            "💬 Комментарий к заказу (можно пропустить):", 
+            reply_markup=kb
+        )
+    else:  # CallbackQuery
+        await message_or_callback.message.answer(
+            "💬 Комментарий к заказу (можно пропустить):", 
+            reply_markup=kb
+        )
 
 
 @router.callback_query(F.data == "skip_promocode", OrderForm.waiting_promo)
@@ -562,10 +571,11 @@ async def skip_promo_callback(callback: types.CallbackQuery, state: FSMContext):
 @router.message(OrderForm.waiting_comment)
 async def process_comment(message: types.Message, state: FSMContext):
     await state.update_data(comment=message.text or "-")
+    await state.set_state(OrderForm.waiting_summary)
     await show_order_summary(message, state)
 
 
-async def show_order_summary(message: types.Message, state: FSMContext):
+async def show_order_summary(message_or_callback, state: FSMContext):
     data = await state.get_data()
     cake = data["selected_cake"]
 
@@ -584,20 +594,24 @@ async def show_order_summary(message: types.Message, state: FSMContext):
         f"Торт: {cake['name']}\n"
         f"Итоговая стоимость: {final_price}₽"
     )
-
-    await state.set_state(OrderForm.waiting_comment)
     
-    await message.edit_text(
-        summary,
-        reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text="Подтвердить заказ", callback_data="order_confirmed")],
-            [InlineKeyboardButton(text="Изменить", callback_data="restart_order")],
-            [InlineKeyboardButton(text="Главное меню", callback_data="main_menu")]
-        ])
-    )
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="Подтвердить заказ", callback_data="order_confirmed")],
+        [InlineKeyboardButton(text="Изменить", callback_data="restart_order")],
+        [InlineKeyboardButton(text="Главное меню", callback_data="main_menu")]
+    ])
+
+    if isinstance(message_or_callback, types.Message):
+        try:
+            await message_or_callback.delete()
+        except:
+            pass
+        await message_or_callback.answer(summary, reply_markup=kb)
+    else:
+        await message_or_callback.message.edit_text(summary, reply_markup=kb)
 
 
-@router.callback_query(F.data == "order_confirmed")
+@router.callback_query(F.data == "order_confirmed", OrderForm.waiting_summary)
 async def processing_order(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     cake = data['selected_cake']
