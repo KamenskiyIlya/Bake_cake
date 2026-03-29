@@ -10,7 +10,7 @@ from keyboards.admin_kb import (
     after_change_status)
 from config import ADMIN_IDS, ORDERS, CUSTOMERS
 from handlers.states import AdminStates
-from handlers.db_utils import load_db, save_db
+from handlers.db_utils import load_db, save_db, get_bot_stats
 
 
 router = Router()
@@ -47,10 +47,18 @@ async def admin_back_panel(callback: CallbackQuery):
     await callback.answer()
 
 
-@router.callback_query(F.data == 'link_stats', is_admin_callback)
+@router.callback_query(F.data == 'show_stats', is_admin_callback)
 async def admin_link_stats(callback: CallbackQuery):
-    'Прописать вывод информации о переходах по ссылке(статистика по рекламе)'
-    pass
+    stats = get_bot_stats()
+
+    await callback.message.answer(
+        'Статистика переходов в бота:\n'
+        f'Всего запусков (/start): {stats['total_starts']}\n'
+        f'Уникальных пользователей: {stats['unique_users']}',
+        reply_markup=admin_main_kb()
+    )
+
+    await callback.answer()
 
 
 @router.callback_query(F.data == 'new_orders', is_admin_callback)
@@ -150,6 +158,7 @@ async def change_order_status(callback: CallbackQuery, state: FSMContext):
     AdminStates.waiting_new_status)
 async def admin_set_status(callback: CallbackQuery, state: FSMContext):
     status_list = {
+    'notpaid': 'Не оплачен',
     'paid': 'Оплачен',
     'delivery': 'Передан в доставку',
     'delivered': 'Заказ доставлен'

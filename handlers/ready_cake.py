@@ -460,7 +460,7 @@ async def process_address(message: types.Message, state: FSMContext):
         "Введите дату:\n"
         "В формате - 15.12.2025\n\n"
         "Срочная 24ч: +20%",
-        reply_markup=ReplyKeyboardMarkup(keyboard=[], resize_keyboard=True)
+        reply_markup=ReplyKeyboardRemove()
     )
 
 

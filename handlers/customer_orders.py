@@ -1,13 +1,15 @@
 from aiogram import Router, F, types
-from keyboards.customer_orders_kb import (
-    show_user_order, what_customer_needs, old_address_kb, first_order_kb)
-from keyboards.menu import main_menu_kb
 from aiogram.types import CallbackQuery, Message, ReplyKeyboardRemove
 from aiogram.fsm.context import FSMContext
 
-
-from config import ORDERS, CAKES, CUSTOMERS
+from keyboards.customer_orders_kb import (
+    show_user_order, what_customer_needs, old_address_kb, first_order_kb)
+from keyboards.menu import main_menu_kb
 from handlers.states import OrderForm
+from handlers.ready_cake import generate_payment_url
+from keyboards.ready_cake import generate_payment_kb
+from handlers.db_utils import load_db
+from config import ORDERS, CAKES, CUSTOMERS
 
 from datetime import datetime
 
@@ -15,6 +17,11 @@ from datetime import datetime
 router = Router()
 
 STATUSES = {
+    'Не оплачен': (
+        '⏳ Ожидает оплаты\n\n'
+        'Заказ сформирован, но оплата ещё не поступила.\n'
+        'Чтобы мы начали обработку, пожалуйста, завершите оплату удобным способом.\n'
+        'Если оплата уже была произведена — в течение нескольких минут статус обновится автоматически.'),
     'Оплачен': (
         '✅ Оплачен\n\n'
         'Спасибо! Оплата успешно получена.\n'
@@ -84,10 +91,11 @@ async def show_orders(message: Message, state: FSMContext):
 
 
 @router.callback_query(F.data.startswith('order_id_'))
-async def chose_order(callback: CallbackQuery, state: FSMContext):
+async def choose_order(callback: CallbackQuery, state: FSMContext):
     order_id = int(callback.data.split('_')[2])
     order = next((order for order in ORDERS if order['id'] == order_id), None)
     await state.update_data(order_id=order_id)
+    await state.update_data(order=order)
 
     state_data = await state.get_data()
     message_ids = state_data.get('order_messages', [])
@@ -110,8 +118,39 @@ async def chose_order(callback: CallbackQuery, state: FSMContext):
         f'Адрес доставки: {order["address"]}\n'
         f'Статус: {order["status"]}\n\n'
         'Выберите, что Вас интересует',
-        reply_markup=what_customer_needs())
+        reply_markup=what_customer_needs(order['status']))
 
+    await callback.answer()
+
+
+@router.callback_query(F.data.startswith('pay_existing_order'))
+async def choose_payment(callback: CallbackQuery, state: FSMContext):
+    data = await state.get_data()
+    order_id = data.get('order_id')
+    order = data.get('order')
+    description = f"Торт {order['product_name']} #{order_id}"
+
+    payment_url = generate_payment_url(
+        order_id,
+        order['total_price'],
+        description
+    )
+    payment_kb = generate_payment_kb(order_id, payment_url)
+
+    text = (
+        f"Детали заказа:\n"
+        f"- Торт: {order['product_name']}\n"
+        f"- Стоимость: {order['total_price']}₽\n"
+        f"- Комментарий: {order['comment']}\n"
+        f"- Доставка: {order['deliver_to']}\n"
+        f"- Адрес: {order['address']}\n"
+        f"- Статус: {order['status']}\n\n"
+        'Выберите способ оплаты:'
+    )
+
+    await callback.message.answer(text, reply_markup=payment_kb)
+
+    await state.update_data(current_order_id=order_id)
     await callback.answer()
 
 

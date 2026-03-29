@@ -1,8 +1,10 @@
 from aiogram import Router, types, F
 from aiogram.filters import Command
 from aiogram.types import FSInputFile
+
 from config import PD_PDF_PATH
 from keyboards.menu import main_menu_kb
+from handlers.db_utils import update_bot_stats
 
 
 router = Router()
@@ -11,6 +13,9 @@ router = Router()
 @router.message(Command("start"))
 async def start_bot(message: types.Message):
     pdf = FSInputFile(PD_PDF_PATH)
+    user_id = message.from_user.id
+
+    update_bot_stats(user_id)
 
     await message.answer_document(
         document=pdf,

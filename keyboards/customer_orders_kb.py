@@ -15,14 +15,20 @@ def show_user_order(order):
 	return InlineKeyboardMarkup(inline_keyboard=keyboard)
 
 
-def what_customer_needs():
+def what_customer_needs(order_status):
 	keyboard = [
-		[
-		InlineKeyboardButton(text='Узнать статус', callback_data='check_status'),
-		InlineKeyboardButton(text='Повторить заказ', callback_data='repeat_order')
-		],
-		[InlineKeyboardButton(text='Главное меню', callback_data='main_menu')]
+		[InlineKeyboardButton(text='Узнать статус', callback_data='check_status')],
+		[InlineKeyboardButton(text='Повторить заказ', callback_data='repeat_order')]
 	]
+
+	if order_status == 'Не оплачен':
+		keyboard.append(
+			[InlineKeyboardButton(text='Оплатить заказ', callback_data='pay_existing_order')]
+		)
+
+	keyboard.append(
+		[InlineKeyboardButton(text='Главное меню', callback_data='main_menu')]
+	)
 
 	return InlineKeyboardMarkup(inline_keyboard=keyboard)
 

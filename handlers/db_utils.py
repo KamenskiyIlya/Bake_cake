@@ -173,3 +173,25 @@ def update_order(order_id, **kwargs):
 def mark_order_paid(order_id):
     current_date = datetime.now().date().strftime('%d.%m.%Y')
     return update_order(order_id, status="Оплачен", start_date=current_date)
+
+
+def update_bot_stats(user_id):
+    db = load_db()
+
+    db['bot_stats']['total_starts'] = db['bot_stats'].get('total_starts', 0) + 1
+
+    if user_id not in db['bot_stats'].get('unique_users', []):
+        db['bot_stats']['unique_users'].append(user_id)
+
+    save_db(db)
+
+
+def get_bot_stats():
+    db = load_db()
+    stats = db.get('bot_stats', {})
+    bot_stats = {
+        'total_starts': stats.get('total_starts', 0),
+        'unique_users': len(stats.get('unique_users', []))
+    }
+
+    return bot_stats

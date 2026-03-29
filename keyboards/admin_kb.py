@@ -9,7 +9,7 @@ from aiogram.types import (
 def admin_main_kb():
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text='Статистика переходов по ссылке',
-            callback_data='link_stats')],
+            callback_data='show_stats')],
         [InlineKeyboardButton(text='Новые заказы',
             callback_data='new_orders')],
         [InlineKeyboardButton(text='Главное меню',
@@ -47,6 +47,8 @@ def order_actions(order_id, customer_tg_id):
 
 def change_order_status_kb():
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text='Не оплачен',
+            callback_data='status_notpaid')],
         [InlineKeyboardButton(text='Оплачен',
             callback_data='status_paid')],
         [InlineKeyboardButton(text='Передан в доставку',
