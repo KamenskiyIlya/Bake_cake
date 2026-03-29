@@ -690,7 +690,7 @@ async def process_pay_order(callback: types.CallbackQuery, state: FSMContext):
             await callback.answer()
             return
 
-        description = f"Торт {order.get('product_name', 'Торт')} #{order_id}"
+        description = f"Торт - {order.get('product_name', 'Торт')} #{order_id}"
         payment_url = generate_payment_url(
             order_id=order_id,
             amount=order['total_price'],
@@ -709,8 +709,7 @@ async def process_pay_order(callback: types.CallbackQuery, state: FSMContext):
                 f"{description}\n\n"
                 f"Сохраните номер заказа #{order_id}!"
             ),
-            reply_markup=generate_payment_kb(order_id, payment_url),
-            parse_mode="Markdown"
+            reply_markup=generate_payment_kb(order_id, payment_url)
         )
 
         try:
@@ -732,7 +731,6 @@ async def process_pay_order(callback: types.CallbackQuery, state: FSMContext):
                 f"Заказ #{order_id} - {order['total_price']}₽\n\n"
                 f"[Перейти к оплате]({payment_url})",
                 reply_markup=generate_payment_kb(order_id, payment_url),
-                parse_mode="Markdown",
                 disable_web_page_preview=True
             )
         await callback.answer("Ссылка на оплату отправлена!")
