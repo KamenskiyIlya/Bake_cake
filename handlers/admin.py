@@ -8,20 +8,25 @@ from keyboards.admin_kb import (
     order_actions,
     change_order_status_kb,
     after_change_status)
-from config import ADMIN_IDS, ORDERS, CUSTOMERS
 from handlers.states import AdminStates
-from handlers.db_utils import load_db, save_db, get_bot_stats
+from handlers.db_utils import load_db, save_db, get_bot_stats, update_order
 
 
 router = Router()
 
 
 def is_admin(message: Message):
-    return message.from_user.id in ADMIN_IDS
+    db = load_db()
+    admins = db['admins']
+    admin_ids = [admin["telegram_id"] for admin in admins]
+    return message.from_user.id in admin_ids
 
 
 def is_admin_callback(callback: CallbackQuery):
-    return callback.from_user.id in ADMIN_IDS
+    db = load_db()
+    admins = db['admins']
+    admin_ids = [admin["telegram_id"] for admin in admins]
+    return callback.from_user.id in admin_ids
 
 
 @router.message(F.text == 'Админ-панель', is_admin)
@@ -51,7 +56,7 @@ async def admin_back_panel(callback: CallbackQuery):
 async def admin_link_stats(callback: CallbackQuery):
     stats = get_bot_stats()
 
-    await callback.message.answer(
+    await callback.message.edit_text(
         'Статистика переходов в бота:\n'
         f'Всего запусков (/start): {stats['total_starts']}\n'
         f'Уникальных пользователей: {stats['unique_users']}',
@@ -63,7 +68,9 @@ async def admin_link_stats(callback: CallbackQuery):
 
 @router.callback_query(F.data == 'new_orders', is_admin_callback)
 async def show_new_orders(callback: CallbackQuery, state: FSMContext):
-    new_orders = [order for order in ORDERS if order['status'] != 'Заказ доставлен']
+    db = load_db()
+    orders = db.get('orders', [])
+    new_orders = [order for order in orders if order['status'] != 'Заказ доставлен']
 
     if not new_orders:
         await callback.message.edit_text(
@@ -102,9 +109,12 @@ async def show_new_orders(callback: CallbackQuery, state: FSMContext):
     is_admin_callback)
 async def admin_order_details(callback: CallbackQuery, state: FSMContext):
     order_id =int(callback.data.split('_')[2])
-    order = next((order for order in ORDERS if order['id'] == order_id), None)
+    db = load_db()
+    orders = db.get('orders', [])
+    customers = db.get('customers', [])
+    order = next((order for order in orders if order['id'] == order_id), None)
     customer = next(
-        (c for c in CUSTOMERS if order['customer_id'] == c['id']),
+        (c for c in customers if order['customer_id'] == c['id']),
         None)
 
     state_data = await state.get_data()
@@ -125,7 +135,7 @@ async def admin_order_details(callback: CallbackQuery, state: FSMContext):
         f'Телефон: {order["phone_number"]}\n'
         f'Торт: {order["product_name"]}\n'
         f'Кастомизация: {order["customization"]}\n'
-        f'Примененный промокод: {order['promo_code']}'
+        f'Примененный промокод: {order['promo_code']}\n'
         f'Сумма заказа: {order["total_price"]}\n'
         f'Дата заказа: {order["created_at"]}\n'
         f'Доставить к: {order["deliver_to"]}\n'
@@ -169,13 +179,8 @@ async def admin_set_status(callback: CallbackQuery, state: FSMContext):
 
     data = await state.get_data()
     order_id = data.get("current_order_id")
-    db=load_db()
-    orders = db.get('orders')
-    for order in orders:
-        if order['id'] == order_id:
-            order['status'] = new_status
-            save_db(db)
-            break
+
+    update_order(order_id, status=new_status)
 
     await state.clear()
 

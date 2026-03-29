@@ -364,15 +364,60 @@
       "address": "Бумажный город",
       "comment": "Хочу чтобы привезли тор в костюме дракона",
       "promo_code": "BABYCAKE15"
+    },
+    {
+      "id": 8,
+      "customer_id": 1,
+      "product_id": 2,
+      "product_name": "Красный бархат",
+      "customization": null,
+      "total_price": 1400,
+      "created_at": "29.03.2026 15:27",
+      "deliver_to": "02.04.2026 18:00",
+      "status": "Не оплачен",
+      "phone_number": "+79779829413",
+      "address": "Бумажный город",
+      "comment": "-",
+      "promo_code": null
+    },
+    {
+      "id": 9,
+      "customer_id": 1,
+      "product_id": 2,
+      "product_name": "Красный бархат",
+      "customization": null,
+      "total_price": 1400,
+      "created_at": "29.03.2026 15:30",
+      "deliver_to": "02.04.2026 18:00",
+      "status": "Оплачен",
+      "phone_number": "+79779829413",
+      "address": "Тридевятое Царство, Тридевятое Государство",
+      "comment": "-",
+      "promo_code": null
+    },
+    {
+      "id": 10,
+      "customer_id": 1,
+      "product_id": 2,
+      "product_name": "Красный бархат",
+      "customization": null,
+      "total_price": 1400,
+      "created_at": "29.03.2026 15:42",
+      "deliver_to": "03.04.2026 18:00",
+      "status": "Не оплачен",
+      "phone_number": "+79779829413",
+      "address": "Покебол",
+      "comment": "-",
+      "promo_code": null
     }
   ],
   "customers": [
     {
       "id": 1,
       "telegram_id": 441112407,
-      "name": "Тот самыцй",
+      "name": "Пикачу",
       "phone_number": "+79779829413",
-      "address": "Бумажный город"
+      "address": "Покебол"
     },
     {
       "id": 2,
@@ -405,7 +450,7 @@
     }
   ],
   "bot_stats": {
-    "total_starts": 3,
+    "total_starts": 8,
     "unique_users": [
       441112407
     ]

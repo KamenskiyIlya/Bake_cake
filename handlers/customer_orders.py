@@ -9,7 +9,7 @@ from handlers.states import OrderForm
 from handlers.ready_cake import generate_payment_url
 from keyboards.ready_cake import generate_payment_kb
 from handlers.db_utils import load_db
-from config import ORDERS, CAKES, CUSTOMERS
+from config import CAKES
 
 from datetime import datetime
 
@@ -45,7 +45,11 @@ STATUSES = {
 async def show_orders(message: Message, state: FSMContext):
     user_id = message.from_user.id
     customer = None
-    for client in CUSTOMERS:
+    db = load_db()
+    customers = db['customers']
+    orders = db['orders']
+
+    for client in customers:
         if str(client.get('telegram_id')) == str(user_id):
             customer = client
             break
@@ -62,7 +66,8 @@ async def show_orders(message: Message, state: FSMContext):
     info_msg = await message.answer('Ваши заказы:')
     message_ids.append(info_msg.message_id)
 
-    for order in ORDERS:
+
+    for order in orders:
         if customer['id'] == order['customer_id']:
             order_msg = await message.answer(
                 f'Заказ номер: {order["id"]}\n'
@@ -92,8 +97,9 @@ async def show_orders(message: Message, state: FSMContext):
 
 @router.callback_query(F.data.startswith('order_id_'))
 async def choose_order(callback: CallbackQuery, state: FSMContext):
+    db = load_db()
     order_id = int(callback.data.split('_')[2])
-    order = next((order for order in ORDERS if order['id'] == order_id), None)
+    order = find_order_by_id(order_id)
     await state.update_data(order_id=order_id)
     await state.update_data(order=order)
 
@@ -253,7 +259,9 @@ async def cancel_repeat_order(message: Message, state: FSMContext):
 
 
 def find_order_by_id(order_id):
-    for order in ORDERS:
+    db = load_db()
+    orders = db['orders']
+    for order in orders:
         if str(order['id']) == str(order_id):
             return order
     return None

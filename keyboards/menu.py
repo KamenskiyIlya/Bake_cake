@@ -1,5 +1,5 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
-from config import ADMIN_IDS
+from handlers.db_utils import load_db
 
 
 def main_menu_kb(user_id = None):
@@ -10,7 +10,11 @@ def main_menu_kb(user_id = None):
         ]
     ]
 
-    if user_id and user_id in ADMIN_IDS:
+    db = load_db()
+    admins = db.get('admins', [])
+    admin_ids = [admin["telegram_id"] for admin in admins]
+
+    if user_id and user_id in admin_ids:
         keyboard.append([
             KeyboardButton(text="Админ-панель")
         ])
