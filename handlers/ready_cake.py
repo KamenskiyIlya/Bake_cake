@@ -22,11 +22,22 @@ import qrcode
 import tempfile
 import os
 from urllib.parse import urlencode
-from datetime import datetime
+from datetime import datetime, timedelta
+import re
 
 
 router = Router()
 
+
+def is_valid_date(date_str):
+    pattern = r'^\d{2}\.\d{2}\.\d{4}$'
+    if not re.match(pattern, date_str):
+        return False
+    try:
+        datetime.strptime(date_str, '%d.%m.%Y')
+        return True
+    except ValueError:
+        return False
 
 def get_option_by_id(options, option_id_str):
     try:
@@ -469,11 +480,24 @@ async def process_address(message: types.Message, state: FSMContext):
 
 @router.message(OrderForm.waiting_date)
 async def process_date(message: types.Message, state: FSMContext):
-    await state.update_data(date=message.text)
+    date_input = message.text.strip()
+
+    if not is_valid_date(date_input):
+        await message.answer(
+            "Неверный формат даты!\n"
+            "Введите в формате: **15.12.2025**\n\n"
+            "Срочная доставка (24ч): +20%"
+        )
+        return
+    
+    await state.update_data(date=date_input)
     await state.set_state(OrderForm.waiting_time)
+    
     await message.answer(
-        "Выберете время\n"
-        "`18:00` (12:00-21:00)",
+        f"Дата: {date_input}\n\n"
+        "Выберите время доставки:\n"
+        "`18:00` (12:00-21:00)\n\n"
+        "*Срочная доставка в течение 24ч = +20%*",
         reply_markup=ReplyKeyboardMarkup(keyboard=[], resize_keyboard=True)
     )
 
@@ -488,23 +512,46 @@ async def skip_comment_inline(callback: types.CallbackQuery, state: FSMContext):
 
 @router.message(OrderForm.waiting_time)
 async def process_time(message: types.Message, state: FSMContext):
-    await state.update_data(time=message.text)
+    time_input = message.text.strip()
+
+    if not re.match(r'^\d{2}:\d{2}$', time_input):
+        await message.answer(
+            "Неверный формат времени!\n"
+            "Введите в формате: **18:00**\n"
+            "(доступно 12:00-21:00)"
+        )
+        return
+    
+    await state.update_data(time=time_input)
 
     data = await state.get_data()
-    total_price = data["total_price"]
+    order_datetime_str = f"{data['date']} {time_input}"
+    order_datetime = datetime.strptime(order_datetime_str, '%d.%m.%Y %H:%M')
+    now = datetime.now()
+
+    if (order_datetime - now) <= timedelta(hours=24):
+        data = await state.get_data()
+        total_price = data["total_price"]
+        total_price = int(total_price * 1.2)  # +20%
+        await state.update_data(total_price=total_price)
+        
+        await message.answer(
+            f"СРОЧНЫЙ ЗАКАЗ (в течение 24ч)\n"
+            f"Наценка +20%\n\n"
+            f"Доставка: {order_datetime_str}\n"
+            f"ИТОГО: {total_price}₽\n\n"
+            f"Промокод?",
+            parse_mode="Markdown",
+            reply_markup=get_promocode_kb()
+        )
+    else:
+        await message.answer(
+            f"Доставка: {order_datetime_str}\n"
+            f"ИТОГО: {data['total_price']}₽\n\n"
+            f"Промокод?",
+            reply_markup=get_promocode_kb()
+        )
     
-    today_str = datetime.now().strftime("%d.%m.%Y")
-    if data["date"] == today_str:
-        total_price = int(total_price * 1.2)
-    
-    await state.update_data(total_price=total_price)
-    
-    await message.answer(
-        f"ИТОГО: {total_price}₽\n\n"
-        f"Есть промокод?\n"
-        "Введите промокод или кнопку «пропустить»:",
-        reply_markup=get_promocode_kb()
-    )
     await state.set_state(OrderForm.waiting_promo)
 
 
