@@ -149,14 +149,8 @@ def generate_payment_success_kb(order_id=None):
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="Мои заказы",
-                    callback_data=f"my_orders"
-                )
-            ],
-            [
-                InlineKeyboardButton(
                     text="В главное меню",
-                    callback_data="back_to_main"
+                    callback_data="main_menu"
                 )
             ]
         ]

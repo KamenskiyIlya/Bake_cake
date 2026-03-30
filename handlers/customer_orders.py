@@ -16,6 +16,7 @@ from datetime import datetime
 
 router = Router()
 
+
 STATUSES = {
     'Не оплачен': (
         '⏳ Ожидает оплаты\n\n'
